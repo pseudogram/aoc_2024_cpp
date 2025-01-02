@@ -1,3 +1,9 @@
 CMakeCache.txt
 CMakeFiles/
 .DS_Store
+.cache
+Makefile
+cmake_install.cmake
+compile_commands.json
+codeConfig.h
+aoc.tsk
