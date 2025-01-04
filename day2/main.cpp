@@ -1,71 +1,110 @@
-#include <_stdio.h>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <vector>
 
-bool checkDecreasingSafe(std::vector<int> &row) {
-    for (int i = 0, j = 1; j < row.size(); i++, j++) {
-        if (row[i] <= row[j]){
-            return false;
+bool check_increasing(std::vector<int> row) {
+    auto first = row[0];
+    auto second = row[1];
+    int skip = first > second ? 0 : -1;
+    for (auto ptr_1 = 0, ptr_2 = skip+2; ptr_2 != row.size(); ptr_1++, ptr_2++) {
+        if (ptr_1 == skip) {
+            ptr_1++;
         }
-        if (row[i] - row[j] > 3) {
-            return false;
+
+        first = row[ptr_1];
+        second = row[ptr_2];
+
+        if (first >= second) {
+            if (skip > -1)
+                return false;
+            ptr_1--;
+            skip = ptr_2;
+            continue;
+        }
+
+        // max diff of 3
+        if (second - first > 3) {
+            if (skip > -1)
+                return false;
+            ptr_1--;
+            skip = ptr_2;
+            continue;
         }
     }
     return true;
 }
 
-bool checkIncreasingSafe(std::vector<int> &row) {
-    for (int i = 0, j=1; j < row.size(); i++, j++) {
-        if (row[i] >= row[j]){
-            return false;
+bool check_decreasing(std::vector<int> row){
+    auto first = row[0];
+    auto second = row[1];
+    int skip = first < second ? 0 : -1;
+    for (auto ptr_1 = 0, ptr_2 = skip+2; ptr_2 != row.size(); ptr_1++, ptr_2++) {
+        if (ptr_1 == skip) {
+            ptr_1++;
         }
-        if (row[j] - row[i] > 3) {
-            return false;
+
+        first = row[ptr_1];
+        second = row[ptr_2];
+
+        if (first <= second) {
+            if (skip > -1)
+                return false;
+            ptr_1--;
+            skip = ptr_2;
+            continue;
+        }
+
+        // max diff of 3
+        if (first - second > 3) {
+            if (skip > -1)
+                return false;
+            ptr_1--;
+            skip = ptr_2;
+            continue;
         }
     }
     return true;
 }
 
-bool checkSafe(std::vector<int> &row) {
-    if (row[0] > row[1]) {
-        return checkDecreasingSafe(row);
+bool check_safe(std::vector<int> row) {
+    if(check_increasing(row)){
+        return true;
     }
-    if (row[0] < row[1]) {
-        return checkIncreasingSafe(row);
-    }
-    return false;
+    return check_decreasing(row);
 }
 
-std::vector<int> processRow(std::string &str) {
-    std::vector<int> row;
+/**
+ * tested with List and vector
+ */
+template <typename T> T processRow(std::string &str) {
+    T row{};
     std::stringstream sstream{str};
-    std::string line;
-    for (std::string line; std::getline(sstream, line, ' ');) {
-        row.emplace_back(std::stoi(line));
+    for (std::string num; std::getline(sstream, num, ' ');) {
+        row.emplace_back(std::stoi(num));
     }
-    /* for (auto it = row.begin(); it != row.end(); it++) { */
-    /*   std::cout << *it << std::endl; // dereference the iterator */
-    /* } */
-    /* std::cout << std::endl; */
     return row;
 }
 
 int main() {
-    /* std::string filename = "test.txt"; */
-    std::string filename = "input.txt";
+    std::string filename = "test.txt";
+    /* filename = "safe.txt"; */
+    /* filename = "unsafe.txt"; */
+    filename = "input.txt";
+    std::cout << filename << std::endl;
+
 
     std::ifstream file(filename);
     std::string tmpRowString;
     int count = 0;
     int count_unsafe = 0;
 
+    typedef std::vector<int> collection;
+    /* typedef std::list<int> collection; */
     while (getline(file, tmpRowString) && file.good()) {
-        std::vector<int> row = processRow(tmpRowString);
+        collection row = processRow<collection>(tmpRowString);
 
-        if (checkSafe(row)) {
+        if (check_safe(row)) {
             count++;
         } else {
             count_unsafe++;
